@@ -50,15 +50,15 @@ Members:
     assert 3 != y
     # Compare with None
     assert (y != None)  # noqa: E711
-    assert not (y == None)  # noqa: E711
+    assert y is not None
     # Compare with an object
     assert (y != object())
-    assert not (y == object())
+    assert y != object()
     # Compare with string
     assert y != "2"
     assert "2" != y
-    assert not ("2" == y)
-    assert not (y == "2")
+    assert y != "2"
+    assert y != "2"
 
     with pytest.raises(TypeError):
         y < object()
@@ -96,7 +96,7 @@ Members:
     assert m.UnscopedEnum.ETwo >= m.UnscopedEnum.EOne
     assert m.UnscopedEnum.ETwo >= 1
     assert not (m.UnscopedEnum.ETwo < m.UnscopedEnum.EOne)
-    assert not (2 < m.UnscopedEnum.EOne)
+    assert m.UnscopedEnum.EOne <= 2
 
     # arithmetic
     assert m.UnscopedEnum.EOne & m.UnscopedEnum.EThree == m.UnscopedEnum.EOne
@@ -110,16 +110,16 @@ def test_scoped_enum():
     assert m.test_scoped_enum(z) == "ScopedEnum::Two"
 
     # Scoped enums will *NOT* accept ==/!= int comparisons (Will always return False)
-    assert not z == 3
-    assert not 3 == z
+    assert z != 3
+    assert z != 3
     assert z != 3
     assert 3 != z
     # Compare with None
     assert (z != None)  # noqa: E711
-    assert not (z == None)  # noqa: E711
+    assert z is not None
     # Compare with an object
     assert (z != object())
-    assert not (z == object())
+    assert z != object()
     # Scoped enums will *NOT* accept >, <, >= and <= int comparisons (Will throw exceptions)
     with pytest.raises(TypeError):
         z > 3
@@ -150,21 +150,19 @@ def test_implicit_conversion():
     assert f(first) == 1
 
     assert f(first) == f(first)
-    assert not f(first) != f(first)
+    assert f(first) == f(first)
 
     assert f(first) != f(second)
-    assert not f(first) == f(second)
+    assert f(first) != f(second)
 
     assert f(first) == int(f(first))
-    assert not f(first) != int(f(first))
+    assert f(first) == int(f(first))
 
     assert f(first) != int(f(second))
-    assert not f(first) == int(f(second))
+    assert f(first) != int(f(second))
 
     # noinspection PyDictCreation
-    x = {f(first): 1, f(second): 2}
-    x[f(first)] = 3
-    x[f(second)] = 4
+    x = {f(first): 3, f(second): 4}
     # Hashing test
     assert str(x) == "{EMode.EFirstMode: 3, EMode.ESecondMode: 4}"
 

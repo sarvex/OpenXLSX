@@ -19,24 +19,10 @@ import openpyxl
 import xlsxwriter
 from OpenXLSX import *
 
-# Default to 1 sheet with 1000 rows x 50 cols
-# 10 % strings
-row_max = 1000000
-col_max = 8
-sheets = 1
-factor = 0.1
-
-if len(sys.argv) > 1:
-    row_max = int(sys.argv[1])
-
-if len(sys.argv) > 2:
-    col_max = int(sys.argv[2])
-
-if len(sys.argv) > 3:
-    sheets = int(sys.argv[3])
-
-if len(sys.argv) > 4:
-    factor = float(sys.argv[4])
+row_max = int(sys.argv[1]) if len(sys.argv) > 1 else 1000000
+col_max = int(sys.argv[2]) if len(sys.argv) > 2 else 8
+sheets = int(sys.argv[3]) if len(sys.argv) > 3 else 1
+factor = float(sys.argv[4]) if len(sys.argv) > 4 else 0.1
 
 
 def random_string():
@@ -47,9 +33,10 @@ def random_string():
     return "".join(chars)
 
 
-strings = []
-for r in range(int(sheets * row_max * factor)):
-    strings.append([random_string() for c in range(col_max)])
+strings = [
+    [random_string() for _ in range(col_max)]
+    for _ in range(int(sheets * row_max * factor))
+]
 
 
 def print_elapsed_time(module_name, elapsed, optimised=False):
@@ -73,14 +60,15 @@ def time_xlsxwriter(optimised=False):
     string_rows = iter(strings)
     workbook = xlsxwriter.Workbook(filename,
                                    options=options)
-    for r in range(sheets):
+    for _ in range(sheets):
         worksheet = workbook.add_worksheet()
 
         for row in range(row_max):
-            if not row % 10:
-                data = next(string_rows)
-            else:
-                data = [row + col for col in range(col_max)]
+            data = (
+                next(string_rows)
+                if not row % 10
+                else [row + col for col in range(col_max)]
+            )
             worksheet.write_row(row, 0, data)
 
     workbook.close()
@@ -93,22 +81,20 @@ def time_xlsxwriter(optimised=False):
 def time_openpyxl(optimised=False):
     """ Run OpenPyXL in default mode. """
     module_name = "openpyxl"
-    filename = 'openpyxl.xlsx'
-    if optimised:
-        filename = 'openpyxl_opt.xlsx'
-
+    filename = 'openpyxl_opt.xlsx' if optimised else 'openpyxl.xlsx'
     start_time = process_time()
     string_rows = iter(strings)
 
     workbook = openpyxl.Workbook(write_only=optimised)
-    for r in range(sheets):
+    for _ in range(sheets):
         worksheet = workbook.create_sheet()
 
         for row in range(row_max):
-            if not row % 10:
-                data = next(string_rows)
-            else:
-                data = (row + col for col in range(col_max))
+            data = (
+                next(string_rows)
+                if not row % 10
+                else (row + col for col in range(col_max))
+            )
             worksheet.append(data)
 
     # workbook.save(filename)
@@ -129,7 +115,7 @@ def time_openxlsx():
     string_rows = iter(strings)
 
     workbook = doc.workbook()
-    for r in range(sheets):
+    for _ in range(sheets):
         worksheet = workbook.worksheet('Sheet1')
         rng = worksheet.range(XLCellReference('A1'), XLCellReference(row_max, col_max))
 
@@ -148,9 +134,9 @@ def time_openxlsx():
 
 print("")
 print("Versions:")
-print("%s: %s" % ('python', sys.version[:5]))
-print("%s: %s" % ('openpyxl', openpyxl.__version__))
-print("%s: %s" % ('xlsxwriter', xlsxwriter.__version__))
+print(f"python: {sys.version[:5]}")
+print(f"openpyxl: {openpyxl.__version__}")
+print(f"xlsxwriter: {xlsxwriter.__version__}")
 print("")
 
 print("Dimensions:")

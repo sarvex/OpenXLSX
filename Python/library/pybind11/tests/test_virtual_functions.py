@@ -4,6 +4,9 @@ from pybind11_tests import virtual_functions as m
 
 
 def test_override(capture, msg):
+
+
+
     class ExtendedExampleVirt(m.ExampleVirt):
         def __init__(self, state):
             super(ExtendedExampleVirt, self).__init__(state + 1)
@@ -21,7 +24,8 @@ def test_override(capture, msg):
             return "override1"
 
         def pure_virtual(self):
-            print('ExtendedExampleVirt::pure_virtual(): %s' % self.data)
+            print(f'ExtendedExampleVirt::pure_virtual(): {self.data}')
+
 
     class ExtendedExampleVirt2(ExtendedExampleVirt):
         def __init__(self, state):
@@ -161,16 +165,18 @@ def test_alias_delay_initialization2(capture):
 @pytest.unsupported_on_pypy
 @pytest.mark.skipif(not hasattr(m, "NCVirt"), reason="NCVirt test broken on ICPC")
 def test_move_support():
+
+
+
     class NCVirtExt(m.NCVirt):
         def get_noncopyable(self, a, b):
-            # Constructs and returns a new instance:
-            nc = m.NonCopyable(a * a, b * b)
-            return nc
+            return m.NonCopyable(a * a, b * b)
 
         def get_movable(self, a, b):
             # Return a referenced copy
             self.movable = m.Movable(a, b)
             return self.movable
+
 
     class NCVirtExt2(m.NCVirt):
         def get_noncopyable(self, a, b):

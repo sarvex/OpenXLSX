@@ -111,6 +111,7 @@ def test_movable_object():
 
 def test_async_callbacks():
     # serves as state for async callback
+
     class Item:
         def __init__(self, value):
             self.value = value
@@ -128,7 +129,7 @@ def test_async_callbacks():
     # wait until work is done
     from time import sleep
     sleep(0.5)
-    assert sum(res) == sum([x + 3 for x in work])
+    assert sum(res) == sum(x + 3 for x in work)
 
 
 def test_async_async_callbacks():
